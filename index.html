@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dading | 专业服装模特</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <!-- 配置Tailwind自定义颜色 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        mint: {
+                            50: '#F1FAEE',
+                            100: '#E0F7FA',
+                            200: '#B2EBF2',
+                            300: '#80DEEA',
+                            400: '#4DD0E1',
+                            500: '#26C6DA', // 主薄荷绿
+                            600: '#00BCD4',
+                            700: '#00ACC1',
+                            800: '#0097A7',
+                            900: '#00838F',
+                        },
+                        pink: {
+                            light: '#FFCDD2', // 浅粉色点缀
+                            DEFAULT: '#F8BBD0',
+                            dark: '#C2185B',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Playfair Display', 'serif']
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .transition-transform-opacity {
+                transition-property: transform, opacity;
+            }
+            .float-animation {
+                animation: float 6s ease-in-out infinite;
+            }
+            .dress-sway {
+                animation: dressSway 8s ease-in-out infinite;
+            }
+        }
+    </style>
+    
+    <style>
+        /* 导入字体 */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+        
+        /* 全局样式 */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* 动画定义 */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @keyframes dressSway {
+            0% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-10px) rotate(2deg); }
+            50% { transform: translateY(-15px) rotate(0deg); }
+            75% { transform: translateY(-10px) rotate(-2deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+        
+        /* 轮播图动画 */
+        .carousel-item {
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-position: center;
+            background-size: cover;
+        }
+        
+        .carousel-item.active {
+            opacity: 1;
+            z-index: 1;
+        }
+        
+        /* 裙摆装饰 */
+        .dress-decoration {
+            position: absolute;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.15;
+            z-index: 0;
+        }
+    </style>
+</head>
+
+<body class="bg-white text-gray-800 overflow-x-hidden">
+    <!-- 飘动的裙摆装饰元素 -->
+    <div class="dress-decoration dress-sway hidden lg:block" style="width: 400px; height: 600px; top: 20%; left: -150px; background-image: url('https://picsum.photos/id/64/400/600');"></div>
+    <div class="dress-decoration dress-sway hidden lg:block" style="width: 500px; height: 700px; top: 40%; right: -200px; background-image: url('https://picsum.photos/id/65/500/700'); animation-delay: 2s;"></div>
+    <div class="dress-decoration dress-sway hidden md:block" style="width: 300px; height: 500px; top: 120%; left: 10%; background-image: url('https://picsum.photos/id/76/300/500'); animation-delay: 4s;"></div>
+    
+    <!-- 导航栏 -->
+    <header id="navbar" class="fixed w-full z-50 transition-all duration-300 py-4">
+        <div class="container mx-auto px-4 md:px-8 flex justify-between items-center">
+            <a href="#" class="text-2xl font-display font-bold text-white text-shadow">dading</a>
+            
+            <!-- 桌面导航 -->
+            <nav class="hidden md:flex space-x-8">
+                <a href="#home" class="text-white hover:text-pink-light transition-colors font-medium">首页</a>
+                <a href="#about" class="text-white hover:text-pink-light transition-colors font-medium">关于</a>
+                <a href="#portfolio" class="text-white hover:text-pink-light transition-colors font-medium">作品集</a>
+                <a href="#services" class="text-white hover:text-pink-light transition-colors font-medium">服务</a>
+                <a href="#contact" class="text-white hover:text-pink-light transition-colors font-medium">联系</a>
+            </nav>
+            
+            <!-- 移动端菜单按钮 -->
+            <button id="menuBtn" class="md:hidden text-white text-2xl">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+        
+        <!-- 移动端导航菜单 -->
+        <div id="mobileMenu" class="md:hidden bg-white bg-opacity-95 absolute w-full left-0 top-full py-4 px-4 shadow-lg transform -translate-y-full opacity-0 transition-all duration-300 pointer-events-none">
+            <nav class="flex flex-col space-y-4">
+                <a href="#home" class="text-gray-800 hover:text-mint-500 transition-colors font-medium py-2">首页</a>
+                <a href="#about" class="text-gray-800 hover:text-mint-500 transition-colors font-medium py-2">关于</a>
+                <a href="#portfolio" class="text-gray-800 hover:text-mint-500 transition-colors font-medium py-2">作品集</a>
+                <a href="#services" class="text-gray-800 hover:text-mint-500 transition-colors font-medium py-2">服务</a>
+                <a href="#contact" class="text-gray-800 hover:text-mint-500 transition-colors font-medium py-2">联系</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 英雄区/轮播 -->
+    <section id="home" class="relative h-screen overflow-hidden">
+        <div id="carousel" class="h-full w-full relative">
+            <!-- 轮播图片 -->
+            <div class="carousel-item active" style="background-image: url('https://picsum.photos/id/64/1920/1080');"></div>
+            <div class="carousel-item" style="background-image: url('https://picsum.photos/id/65/1920/1080');"></div>
+            <div class="carousel-item" style="background-image: url('https://picsum.photos/id/76/1920/1080');"></div>
+            
+            <!-- 轮播内容叠加层 -->
+            <div class="absolute inset-0 bg-black bg-opacity-30 z-10"></div>
+            <div class="absolute inset-0 z-20 flex items-center justify-center">
+                <div class="text-center px-4">
+                    <h1 class="text-[clamp(2.5rem,8vw,5rem)] font-display font-bold text-white mb-6 text-shadow opacity-0 transform translate-y-8 transition-transform-opacity duration-1000" id="heroTitle">
+                        dading
+                    </h1>
+                    <p class="text-[clamp(1rem,3vw,1.5rem)] text-white max-w-2xl mx-auto mb-10 text-shadow opacity-0 transform translate-y-8 transition-transform-opacity duration-1000 delay-300" id="heroSubtitle">
+                        专业服装模特 | 时尚表现力 | 品牌合作
+                    </p>
+                    <a href="#portfolio" class="inline-block bg-mint-500 hover:bg-mint-600 text-white font-medium px-8 py-3 rounded-full transition-all transform hover:scale-105 opacity-0 transform translate-y-8 transition-transform-opacity duration-1000 delay-500" id="heroBtn">
+                        查看作品集
+                    </a>
+                </div>
+            </div>
+            
+            <!-- 轮播控制按钮 -->
+            <div class="absolute bottom-10 left-0 right-0 z-20 flex justify-center space-x-3">
+                <button class="carousel-dot w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition-all active" data-index="0"></button>
+                <button class="carousel-dot w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition-all" data-index="1"></button>
+                <button class="carousel-dot w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition-all" data-index="2"></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于我 -->
+    <section id="about" class="py-20 bg-mint-50 relative z-10">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-[clamp(1.8rem,5vw,3rem)] font-display font-bold text-gray-800 mb-4">关于我</h2>
+                <div class="w-24 h-1 bg-mint-500 mx-auto"></div>
+            </div>
+            
+            <div class="flex flex-col lg:flex-row items-center gap-12">
+                <div class="lg:w-1/2">
+                    <div class="relative">
+                        <img src="https://picsum.photos/id/64/800/1000" alt="dading模特照片" class="w-full h-auto rounded-lg shadow-xl object-cover" style="max-height: 600px;">
+                        <div class="absolute -bottom-6 -right-6 bg-white p-6 rounded-lg shadow-lg hidden md:block">
+                            <p class="text-3xl font-display font-bold text-mint-600">5+</p>
+                            <p class="text-gray-600">年专业模特经验</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="lg:w-1/2">
+                    <h3 class="text-2xl font-display font-semibold mb-6 text-gray-800">专业服装模特</h3>
+                    <p class="text-gray-600 mb-6 leading-relaxed">
+                        我是dading，一位充满热情的专业服装模特，拥有5年以上时尚行业经验。我热爱通过肢体语言和表情传达服装的设计理念与情感，擅长将设计师的创意完美呈现。
+                    </p>
+                    <p class="text-gray-600 mb-8 leading-relaxed">
+                        曾与多个国内外知名品牌合作，参与时装周、平面广告拍摄、品牌发布会等多种形式的活动。我注重细节，对时尚有敏锐的洞察力，能够快速理解并诠释不同风格的服装特点。
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-6 mb-8">
+                        <div>
+                            <p class="font-medium text-gray-800 mb-1"><i class="fa fa-check text-mint-500 mr-2"></i> 时装秀</p>
+                            <p class="font-medium text-gray-800 mb-1"><i class="fa fa-check text-mint-500 mr-2"></i> 平面拍摄</p>
+                            <p class="font-medium text-gray-800"><i class="fa fa-check text-mint-500 mr-2"></i> 广告代言</p>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-800 mb-1"><i class="fa fa-check text-mint-500 mr-2"></i> 品牌发布会</p>
+                            <p class="font-medium text-gray-800 mb-1"><i class="fa fa-check text-mint-500 mr-2"></i> 电商拍摄</p>
+                            <p class="font-medium text-gray-800"><i class="fa fa-check text-mint-500 mr-2"></i> 形象代言</p>
+                        </div>
+                    </div>
+                    
+                    <a href="#contact" class="inline-block bg-mint-500 hover:bg-mint-600 text-white font-medium px-8 py-3 rounded-full transition-all transform hover:scale-105">
+                        合作咨询
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 作品集 -->
+    <section id="portfolio" class="py-20 bg-white relative z-10">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-[clamp(1.8rem,5vw,3rem)] font-display font-bold text-gray-800 mb-4">精选作品</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto mb-6">探索我的模特作品集，展示不同风格和品牌的合作项目</p>
+                <div class="w-24 h-1 bg-mint-500 mx-auto"></div>
+            </div>
+            
+            <!-- 作品分类 -->
+            <div class="flex flex-wrap justify-center gap-4 mb-12">
+                <button class="portfolio-filter active px-6 py-2 rounded-full bg-mint-500 text-white font-medium transition-all" data-filter="all">全部</button>
+                <button class="portfolio-filter px-6 py-2 rounded-full bg-gray-200 hover:bg-mint-100 text-gray-700 font-medium transition-all" data-filter="fashion">时装秀</button>
+                <button class="portfolio-filter px-6 py-2 rounded-full bg-gray-200 hover:bg-mint-100 text-gray-700 font-medium transition-all" data-filter="editorial">杂志 editorial</button>
+                <button class="portfolio-filter px-6 py-2 rounded-full bg-gray-200 hover:bg-mint-100 text-gray-700 font-medium transition-all" data-filter="commercial">商业广告</button>
+            </div>
+            
+            <!-- 作品网格 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- 作品1 -->
+                <div class="portfolio-item group" data-category="fashion">
+                    <div class="relative overflow-hidden rounded-lg shadow-lg">
+                        <img src="https://picsum.photos/id/64/600/800" alt="时装秀作品" class="w-full h-80 object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-mint-500 bg-opacity-80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div class="text-center p-6">
+                                <h3 class="text-xl font-display font-semibold text-white mb-2">春季时装周</h3>
+                                <p class="text-white text-sm mb-4">米兰时装周走秀</p>
+                                <a href="#" class="inline-block text-white border border-white px-4 py-2 rounded-full hover:bg-white hover:text-mint-500 transition-colors">
+                                    查看详情
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 作品2 -->
+                <div class="portfolio-item group" data-category="editorial">
+                    <div class="relative overflow-hidden rounded-lg shadow-lg">
+                        <img src="https://picsum.photos/id/65/600/800" alt="杂志editorial作品" class="w-full h-80 object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-mint-500 bg-opacity-80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div class="text-center p-6">
+                                <h3 class="text-xl font-display font-semibold text-white mb-2">时尚杂志</h3>
+                                <p class="text-white text-sm mb-4">VOGUE杂志拍摄</p>
+                                <a href="#" class="inline-block text-white border border-white px-4 py-2 rounded-full hover:bg-white hover:text-mint-500 transition-colors">
+                                    查看详情
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 作品3 -->
+                <div class="portfolio-item group" data-category="commercial">
+                    <div class="relative overflow-hidden rounded-lg shadow-lg">
+                        <img src="https://picsum.photos/id/76/600/800" alt="商业广告作品" class="w-full h-80 object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-mint-500 bg-opacity-80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div class="text-center p-6">
+                                <h3 class="text-xl font-display font-semibold text-white mb-2">品牌广告</h3>
+                                <p class="text-white text-sm mb-4">夏季系列广告</p>
+                                <a href="#" class="inline-block text-white border border-white px-4 py-2 rounded-full hover:bg-white hover:text-mint-500 transition-colors">
+                                    查看详情
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 作品4 -->
+                <div class="portfolio-item group" data-category="fashion">
+                    <div class="relative overflow-hidden rounded-lg shadow-lg">
+                        <img src="https://picsum.photos/id/82/600/800" alt="时装秀作品" class="w-full h-80 object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-mint-500 bg-opacity-80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div class="text-center p-6">
+                                <h3 class="text-xl font-display font-semibold text-white mb-2">巴黎时装周</h3>
+                                <p class="text-white text-sm mb-4">高级定制系列</p>
+                                <a href="#" class="inline-block text-white border border-white px-4 py-2 rounded-full hover:bg-white hover:text-mint-500 transition-colors">
+                                    查看详情
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 作品5 -->
+                <div class="portfolio-item group" data-category="editorial">
+                    <div class="relative overflow-hidden rounded-lg shadow-lg">
+                        <img src="https://picsum.photos/id/91/600/800" alt="杂志editorial作品" class="w-full h-80 object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-mint-500 bg-opacity-80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div class="text-center p-6">
+                                <h3 class="text-xl font-display font-semibold text-white mb-2">时尚特辑</h3>
+                                <p class="text-white text-sm mb-4">ELLE杂志专题</p>
+                                <a href="#" class="inline-block text-white border border-white px-4 py-2 rounded-full hover:bg-white hover:text-mint-500 transition-colors">
+                                    查看详情
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 作品6 -->
+                <div class="portfolio-item group" data-category="commercial">
+                    <div class="relative overflow-hidden rounded-lg shadow-lg">
+                        <img src="https://picsum.photos/id/26/600/800" alt="商业广告作品" class="w-full h-80 object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-mint-500 bg-opacity-80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div class="text-center p-6">
+                                <h3 class="text-xl font-display font-semibold text-white mb-2">秋冬系列</h3>
+                                <p class="text-white text-sm mb-4">品牌形象广告</p>
+                                <a href="#" class="inline-block text-white border border-white px-4 py-2 rounded-full hover:bg-white hover:text-mint-500 transition-colors">
+                                    查看详情
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <a href="#" class="inline-block border-2 border-mint-500 text-mint-500 hover:bg-mint-500 hover:text-white font-medium px-8 py-3 rounded-full transition-all">
+                    查看更多作品
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 服务 -->
+    <section id="services" class="py-20 bg-mint-50 relative z-10">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-[clamp(1.8rem,5vw,3rem)] font-display font-bold text-gray-800 mb-4">我的服务</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto mb-6">提供专业的模特服务，满足不同品牌和项目的需求</p>
+                <div class="w-24 h-1 bg-mint-500 mx-auto"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- 服务1 -->
+                <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow transform hover:-translate-y-2 transition-transform">
+                    <div class="w-16 h-16 bg-mint-100 rounded-full flex items-center justify-center mb-6">
+                        <i class="fa fa-male text-2xl text-mint-600"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-semibold mb-4 text-gray-800">时装秀模特</h3>
+                    <p class="text-gray-600 mb-6">专业时装秀走秀服务，包括品牌发布会、时装周等各类时装展示活动。</p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="text-gray-600 flex items-center"><i class="fa fa-check text-mint-500 mr-2"></i> 时装周走秀</li>
+                        <li class="text-gray-600 flex items-center"><i class="fa fa-check text-mint-500 mr-2"></i> 品牌发布会</li>
+                        <li class="text-gray-600 flex items-center"><i class="fa fa-check text-mint-500 mr-2"></i> 新品展示</li>
+                    </ul>
+                </div>
+                
+                <!-- 服务2 -->
+                <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow transform hover:-translate-y-2 transition-transform">
+                    <div class="w-16 h-16 bg-mint-100 rounded-full flex items-center justify-center mb-6">
+                        <i class="fa fa-camera text-2xl text-mint-600"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-semibold mb-4 text-gray-800">平面拍摄</h3>
+                    <p class="text-gray-600 mb-6">专业平面广告拍摄服务，为杂志、品牌画册、电商平台等提供高质量模特拍摄。</p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="text-gray-600 flex items-center"><i class="fa fa-check text-mint-500 mr-2"></i> 杂志editorial</li>
+                        <li class="text-gray-600 flex items-center"><i class="fa fa-check text-mint-500 mr-2"></i> 品牌画册</li>
+                        <li class="text-gray-600 flex items-center"><i class="fa fa-check text-mint-500 mr-2"></i> 电商产品</li>
+                    </ul>
+                </div>
+                
+                <!-- 服务3 -->
+                <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow transform hover:-translate-y-2 transition-transform">
+                    <div class="w-16 h-16 bg-mint-100 rounded-full flex items-center justify-center mb-6">
+                        <i class="fa fa-video-camera text-2xl text-mint-600"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-semibold mb-4 text-gray-800">视频广告</h3>
+                    <p class="text-gray-600 mb-6">为品牌广告片、宣传片、短视频等提供专业模特表演服务，展现产品特点。</p>
+                    <ul class="space-y-2 mb-6">
+                        <li class="text-gray-600 flex items-center"><i class="fa fa-check text-mint-500 mr-2"></i> 电视广告</li>
+                        <li class="text-gray-600 flex items-center"><i class="fa fa-check text-mint-500 mr-2"></i> 品牌宣传片</li>
+                        <li class="text-gray-600 flex items-center"><i class="fa fa-check text-mint-500 mr-2"></i> 社交媒体视频</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 合作品牌 -->
+    <section class="py-16 bg-white relative z-10">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-2xl font-display font-bold text-gray-800">合作品牌</h2>
+            </div>
+            
+            <div class="flex flex-wrap justify-center items-center gap-12 md:gap-20">
+                <div class="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
+                    <img src="https://picsum.photos/id/1/150/60" alt="品牌1" class="h-8 md:h-10">
+                </div>
+                <div class="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
+                    <img src="https://picsum.photos/id/2/150/60" alt="品牌2" class="h-8 md:h-10">
+                </div>
+                <div class="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
+                    <img src="https://picsum.photos/id/3/150/60" alt="品牌3" class="h-8 md:h-10">
+                </div>
+                <div class="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
+                    <img src="https://picsum.photos/id/4/150/60" alt="品牌4" class="h-8 md:h-10">
+                </div>
+                <div class="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
+                    <img src="https://picsum.photos/id/5/150/60" alt="品牌5" class="h-8 md:h-10">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 联系 -->
+    <section id="contact" class="py-20 bg-mint-500 text-white relative z-10">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-[clamp(1.8rem,5vw,3rem)] font-display font-bold mb-4">联系我</h2>
+                <p class="max-w-2xl mx-auto mb-6 opacity-90">有合作意向或任何问题？请随时联系我，我会尽快回复</p>
+                <div class="w-24 h-1 bg-white mx-auto"></div>
+            </div>
+            
+            <div class="flex flex-col lg:flex-row gap-12">
+                <div class="lg:w-1/2">
+                    <form class="bg-white text-gray-800 p-8 rounded-lg shadow-lg">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label for="name" class="block text-gray-700 mb-2">姓名</label>
+                                <input type="text" id="name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mint-500" placeholder="您的姓名">
+                            </div>
+                            <div>
+                                <label for="email" class="block text-gray-700 mb-2">邮箱</label>
+                                <input type="email" id="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mint-500" placeholder="您的邮箱">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label for="subject" class="block text-gray-700 mb-2">主题</label>
+                            <input type="text" id="subject" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mint-500" placeholder="消息主题">
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label for="message" class="block text-gray-700 mb-2">消息</label>
+                            <textarea id="message" rows="5" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-mint-500" placeholder="请输入您的消息内容"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-mint-500 hover:bg-mint-600 text-white font-medium px-6 py-3 rounded-lg transition-all transform hover:scale-[1.02]">
+                            发送消息
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="lg:w-1/2 flex flex-col justify-center">
+                    <h3 class="text-2xl font-display font-semibold mb-8">联系方式</h3>
+                    
+                    <div class="space-y-6 mb-12">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fa fa-envelope text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-medium mb-1">邮箱</h4>
+                                <p class="opacity-90">contact@dading-model.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fa fa-phone text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-medium mb-1">电话</h4>
+                                <p class="opacity-90">+86 138 xxxx xxxx</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fa fa-map-marker text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-medium mb-1">工作室</h4>
+                                <p class="opacity-90">上海市静安区南京西路1266号恒隆广场46楼</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-medium mb-4">社交媒体</h4>
+                        <div class="flex space-x-4">
+                            <a href="#" class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-pink-light transition-colors">
+                                <i class="fa fa-instagram"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-pink-light transition-colors">
+                                <i class="fa fa-weibo"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-pink-light transition-colors">
+                                <i class="fa fa-wechat"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-pink-light transition-colors">
+                                <i class="fa fa-youtube-play"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 text-white py-12 relative z-10">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <h3 class="text-2xl font-display font-bold mb-2">dading</h3>
+                    <p class="text-gray-400">专业服装模特 | 时尚表现力</p>
+                </div>
+                
+                <div class="text-gray-400 text-center md:text-right">
+                    <p>&copy; 2023 dading Model. 保留所有权利。</p>
+                    <p class="mt-2">由专业团队精心设计</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 返回顶部按钮 -->
+    <button id="backToTop" class="fixed bottom-8 right-8 w-12 h-12 bg-mint-500 text-white rounded-full flex items-center justify-center shadow-lg transform translate-y-20 opacity-0 transition-all z-50">
+        <i class="fa fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 显示英雄区动画元素
+            setTimeout(() => {
+                document.getElementById('heroTitle').classList.remove('opacity-0', 'translate-y-8');
+            }, 300);
+            
+            setTimeout(() => {
+                document.getElementById('heroSubtitle').classList.remove('opacity-0', 'translate-y-8');
+            }, 600);
+            
+            setTimeout(() => {
+                document.getElementById('heroBtn').classList.remove('opacity-0', 'translate-y-8');
+            }, 900);
+            
+            // 轮播功能
+            const carouselItems = document.querySelectorAll('.carousel-item');
+            const carouselDots = document.querySelectorAll('.carousel-dot');
+            let currentSlide = 0;
+            let slideInterval;
+            
+            function showSlide(index) {
+                // 隐藏当前幻灯片
+                carouselItems[currentSlide].classList.remove('active');
+                carouselDots[currentSlide].classList.remove('active', 'bg-white', 'bg-opacity-100');
+                carouselDots[currentSlide].classList.add('bg-white', 'bg-opacity-50');
+                
+                // 更新当前索引
+                currentSlide = (index + carouselItems.length) % carouselItems.length;
+                
+                // 显示新幻灯片
+                carouselItems[currentSlide].classList.add('active');
+                carouselDots[currentSlide].classList.add('active', 'bg-white', 'bg-opacity-100');
+                carouselDots[currentSlide].classList.remove('bg-white', 'bg-opacity-50');
+            }
+            
+            function nextSlide() {
+                showSlide(currentSlide + 1);
+            }
+            
+            // 点击指示点切换幻灯片
+            carouselDots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    showSlide(index);
+                    resetSlideInterval();
+                });
+            });
+            
+            // 自动播放
+            function startSlideInterval() {
+                slideInterval = setInterval(nextSlide, 5000);
+            }
+            
+            function resetSlideInterval() {
+                clearInterval(slideInterval);
+                startSlideInterval();
+            }
+            
+            startSlideInterval();
+            
+            // 导航栏滚动效果
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('bg-white', 'shadow-md', 'py-2');
+                    navbar.classList.remove('py-4');
+                    
+                    // 改变导航链接颜色
+                    document.querySelectorAll('#navbar a:not(.mobile-link)').forEach(link => {
+                        link.classList.remove('text-white');
+                        link.classList.add('text-gray-800', 'hover:text-mint-500');
+                    });
+                } else {
+                    navbar.classList.remove('bg-white', 'shadow-md', 'py-2');
+                    navbar.classList.add('py-4');
+                    
+                    // 恢复导航链接颜色
+                    document.querySelectorAll('#navbar a:not(.mobile-link)').forEach(link => {
+                        link.classList.add('text-white');
+                        link.classList.remove('text-gray-800', 'hover:text-mint-500');
+                    });
+                }
+                
+                // 显示/隐藏返回顶部按钮
+                const backToTopBtn = document.getElementById('backToTop');
+                if (window.scrollY > 500) {
+                    backToTopBtn.classList.remove('translate-y-20', 'opacity-0');
+                    backToTopBtn.classList.add('translate-y-0', 'opacity-100');
+                } else {
+                    backToTopBtn.classList.add('translate-y-20', 'opacity-0');
+                    backToTopBtn.classList.remove('translate-y-0', 'opacity-100');
+                }
+            });
+            
+            // 返回顶部功能
+            document.getElementById('backToTop').addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+            
+            // 移动端菜单
+            const menuBtn = document.getElementById('menuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            let menuOpen = false;
+            
+            menuBtn.addEventListener('click', function() {
+                if (menuOpen) {
+                    // 关闭菜单
+                    mobileMenu.classList.add('-translate-y-full', 'opacity-0', 'pointer-events-none');
+                    menuBtn.innerHTML = '<i class="fa fa-bars"></i>';
+                } else {
+                    // 打开菜单
+                    mobileMenu.classList.remove('-translate-y-full', 'opacity-0', 'pointer-events-none');
+                    menuBtn.innerHTML = '<i class="fa fa-times"></i>';
+                }
+                menuOpen = !menuOpen;
+            });
+            
+            // 点击移动端菜单项后关闭菜单
+            document.querySelectorAll('#mobileMenu a').forEach(link => {
+                link.addEventListener('click', function() {
+                    mobileMenu.classList.add('-translate-y-full', 'opacity-0', 'pointer-events-none');
+                    menuBtn.innerHTML = '<i class="fa fa-bars"></i>';
+                    menuOpen = false;
+                });
+            });
+            
+            // 作品过滤功能
+            const filterButtons = document.querySelectorAll('.portfolio-filter');
+            const portfolioItems = document.querySelectorAll('.portfolio-item');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // 更新按钮状态
+                    filterButtons.forEach(btn => {
+                        btn.classList.remove('active', 'bg-mint-500', 'text-white');
+                        btn.classList.add('bg-gray-200', 'hover:bg-mint-100', 'text-gray-700');
+                    });
+                    
+                    this.classList.add('active', 'bg-mint-500', 'text-white');
+                    this.classList.remove('bg-gray-200', 'hover:bg-mint-100', 'text-gray-700');
+                    
+                    const filter = this.getAttribute('data-filter');
+                    
+                    // 过滤作品
+                    portfolioItems.forEach(item => {
+                        if (filter === 'all' || item.getAttribute('data-category') === filter) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+    
